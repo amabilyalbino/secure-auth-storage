@@ -1,0 +1,4 @@
+python-dotenv==1.1.0
+psycopg2-binary==2.9.10
+pytest==8.4.0
+pytest_cov==6.1.1
