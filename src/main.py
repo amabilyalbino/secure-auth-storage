@@ -1,6 +1,6 @@
 from getpass import getpass
 from auth import store_credentials, verify_credentials, user_exists
-from db import initialize_users_table
+from db import setup_user_table
 from logger import configure_logging
 import logging
 
@@ -58,7 +58,7 @@ def login_user():
 
 if __name__ == "__main__":
 	try:
-		initialize_users_table()
+		setup_user_table()
 	except Exception as e:
 		logger.critical("Failed to initialize database. Exiting.")
 		exit(1)

@@ -1,20 +1,20 @@
 import pytest
 from auth import store_credentials, verify_credentials, user_exists
-from db import initialize_users_table, get_connection
+from db import setup_user_table, get_connection
 import psycopg2
 import secrets
 
-# --- Setup and Teardown ---
+# Setup
 
 def setup_module(module):
-    initialize_users_table()
+    setup_user_table()
     # Clean test users before each test run
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM users WHERE username LIKE 'test_user_%'")
             conn.commit()
 
-# --- Tests ---
+# Tests auth
 
 def test_user_registration_and_login():
     username = f"test_user_{secrets.token_hex(4)}"

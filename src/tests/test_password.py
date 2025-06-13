@@ -11,7 +11,7 @@ def sample_password():
 def sample_salt():
     return secrets.token_bytes(16)
 
-# --- Tests ---
+# Hash test
 def test_hash_password_returns_bytes(sample_password, sample_salt):
     hashed = hash_password(sample_password, sample_salt)
     assert isinstance(hashed, bytes)

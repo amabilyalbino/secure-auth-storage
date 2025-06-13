@@ -1,8 +1,7 @@
-import os
 import pytest
 from settings import require_env
 
-# --- Tests ---
+# Settings Tests
 
 def test_require_env_returns_value(monkeypatch):
     monkeypatch.setenv("FAKE_VAR", "some_value")

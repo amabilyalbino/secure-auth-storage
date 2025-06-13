@@ -19,19 +19,31 @@ def get_connection():
         logger.error(f"Failed to connect to database: {e}")
         raise
 
-def initialize_users_table():
+def select_db(query: str, vars, func_name: str):
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS users (
-                        username TEXT PRIMARY KEY,
-                        salt TEXT NOT NULL,
-                        hashed_password TEXT NOT NULL
-                    );
-                """)
-                conn.commit()
-                logger.info("Users table initialized.")
+                cur.execute(query, vars)
+                return cur.fetchall()
     except psycopg2.Error as e:
-        logger.error(f"Database error during table initialization: {e}")
+        logger.error(f"Database error during {func_name}: {e}")
         raise
+
+def insert_db(query: str, vars, func_name:str):
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query,vars)
+                conn.commit()
+               
+    except psycopg2.Error as e:
+        logger.error(f"Database error during {func_name}: {e}")
+        raise
+def setup_user_table():
+    insert_db(
+        "CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, salt TEXT NOT NULL, hashed_password TEXT NOT NULL);",
+        (),
+        "setup_user_table"
+    )
+    logger.info("Users table initialized.")
+

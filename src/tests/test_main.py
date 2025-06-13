@@ -1,13 +1,12 @@
-# tests/test_main.py – now uses real DB, no mocking
-
 import pytest
 from main import register_user, login_user, menu
 from auth import user_exists
 from db import get_connection
-from getpass import getpass
 import builtins
 import io
 import sys
+
+# Login and register tests
 
 @pytest.fixture(scope="module", autouse=True)
 def cleanup_test_users():

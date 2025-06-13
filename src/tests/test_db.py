@@ -1,8 +1,8 @@
 import pytest
-from db import get_connection, initialize_users_table
+from db import get_connection, setup_user_table
 import psycopg2
 
-# --- Tests ---
+# DB Tests
 
 def test_database_connection():
     try:
@@ -13,9 +13,9 @@ def test_database_connection():
         conn.close()
         assert conn.closed == 1
 
-def test_initialize_users_table_creates_table():
+def test_setup_users_table():
     try:
-        initialize_users_table()
+        setup_user_table()
         with get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'users'")
