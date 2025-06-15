@@ -1,3 +1,7 @@
+**Built With:** Python 3.12, PostgreSQL, Docker  
+**Security Focus:** Hashing + Salting + Peppering  
+Includes Unit Tests with pytest
+
 ## Overview
 
 This project is a Python CLI system for storing and validating user credentials using **hashing, salting, and peppering**.
@@ -12,18 +16,10 @@ When I started learning about secure password storage, I couldn’t find clear, 
 - What role salt and pepper play in security
 - How to securely store and validate credentials
 
-<aside>
-
-⚠️ This project was built for **learning purposes only** — to explore and understand secure password handling with **hash, salt, and pepper** using Python.
-
-***Important Notes:***
-
-- **Not for production** – This is a simplified implementation. It skips some best practices to focus on learning.
-- **Secrets in `.env`** – In real projects, secrets should be stored in a **secure manager**, not a plain `.env` file.
-- **No `docker-compose`** – I used only a basic Docker container for PostgreSQL to keep things simple and visual.
-- **Schema created in code** – I used raw SQL in Python for table creation instead of tools.
-- **Minimal structure** – All logic is grouped in a few modules for clarity. In production, proper layer separation would be required.
-</aside>
+> [!WARNING]
+> This project was built for **learning purposes only** — to explore and understand secure password handling with **hash, salt, and pepper** using Python.
+> - **Not for production** – This is a simplified implementation. It skips some best practices to focus on learning.
+> - **Secrets in `.env`** – In real projects, secrets should be stored in a **secure manager**, not a plain `.env` file.
 
 ## The Problem
 
@@ -33,37 +29,88 @@ Storing user credentials in a plain `.txt` file or even in a database, without
 
 ### What is Hashing?
 
-A cryptographic *hash function* encodes data in a one-way,  irreversible format. The same input always produces the same fixed-length output. But there is no way to “reverse” the output and reveal the original input. Example:
+A cryptographic hash function is a one-way function that transforms input data *(such as a password)* into a fixed-length string of characters, but there is no way to “reverse” the output and reveal the original input. Typically represented in hexadecimal.
 
-→ `User password` = "MySecurePassword123"
+Hashing is essential for password storage because it allows systems to verify passwords *without ever storing the original password itself*. Instead, the system stores the hash, and when the user logs in, the input is hashed again and compared.
 
-→ The hash function will convert the password to bytes and hash it
+#### How hashing works:
 
-→ `User password` hashed: a47ef47e8d5bd2852ef74bc1a0f8f0e38c1fa4c7aa9bd80f5b41bffbdd460a37
+>**User password** *(Input)* = "MySecurePassword123"
 
-**Problem:** Using just hash can be a problem, If two users pick the same password like “123456789”, the hash for this users will be the same. This makes hash collisions more likely for identical passwords.
+The hash function will convert the `User password` *(MySecurePassword123)* to bytes and hash it.
+
+>**User password** *hashed*: a47ef47e8d5bd2852ef74bc1a0f8f0e38c1fa4c7aa9bd80f5b41bffbdd460a37
+
+> [!IMPORTANT]  
+> However, using hashing alone is not secure enough — If two users pick the same password like “123456789”, the hash for this users will be the same. This makes hash collisions more likely for identical passwords. 
+>
+>Attackers can use precomputed tables (like rainbow tables) or brute-force methods to reverse common hashes. That’s why secure implementations also use **salt**, **pepper**, and **iterations** to strengthen the hash.
+
+### Pepper
+
+Pepper is a secret string added to the password before hashing, but **never stored in the database.**
+
+While salts are unique per user and saved alongside the hash, pepper is the ***same for all users*** and kept hidden — usually in a secure secrets manager or a `.env` file.
+
+It provides extra protection, even if an attacker steals the database *(with all salts and password hashes)*, they still can’t recreate the hash without knowing the pepper. That’s because the **input to the hash is incomplete**.
+
+#### How pepper works:
+
+**1. Retrieve the pepper**
+
+Retrieve the pepper stored in `.env` or a secrets manager:
+
+> PEPPER="SECRET_PEPPER"
+
+→ This is a **secret string**, the same for every user, and **not stored in the database**
+
+**2. Combine password + pepper**
+
+>***User password:*** "MySecurePassword123"  
+>
+> ***Secret Pepper from .env:***  "SECRET_PEPPER"
+
+→ **Combined value:**  "MySecurePassword123SECRET_PEPPER"
+
+This combination encoded to bytes and passed into the hash function.
+
+**3. Encode and hash**
+The combined string is encoded to bytes and sent into the hash function — later, the salt is added as a separate argument inside the hash process *(you’ll see this next)*.
+
+The salt is added to the combination during the hashing process.
 
 ### What is Salting?
 
-A salt is a random string unique to each user. Salting ensures every hashed password has a **unique value**, even if the plain text passwords are identical. This protects against precomputed “rainbow table” attacks that crack hashed passwords.
+Salting is the process of adding a unique, randomly generated value (called a salt) to each user's password before hashing it. This ensures that even if two users choose the same password, their stored hashes will be different.
+
+Salting protects against:
+- **Rainbow table attacks** (precomputed hashes of common passwords)
+
+- **Hash collisions** for users with identical passwords
 
 So basically, it’s a **random value** that we **generate** and **attach to the password before hashing**.
 
-**1- You generate the salt ( I will explain later How )**
+**1. Generate a unique salt** *( I will explain later how )*
 
-→ e.g. `"xyz789randomSalt"`
+A cryptographically random byte string is generated for *each user*.
 
-→ This is just a **random string**, unique for each user
+Example of a salt string:
 
-**2- You combine the salt with the password**
+> "xyz789randomSalt"
 
-→ e.g.`"MySecurePassword123"` (password)  + `"abc123randomsalt"` (salt)
+This is just a random string, it should be different for every *single user*.
 
-→ Result: `"MySecurePassword123abc123randomsalt"`
+**2. Combine password and salt**
 
-**3- You then pass this combined string into the `hash function`**
+The password and salt are combined — not by merging them as text, but during hashing. The salt is used as part of the hashing process, not just glued onto the password.
 
-→ So the salt is just **added into the input** of the hash — not hashed separately
+**3. Hash the combination**
+
+>**→ Output hash:** "a47ef47e8d5bd2852ef74bc1a0f8f0e38c1fa4c7aa9bd80f5b41bffbdd460a37"
+
+So the salt isn’t hashed by itself, it’s part of the password input before hashing. It simply makes each hash result unique, even if two users have the same password.
+
+
 
 ### **Iterations**
 
@@ -71,48 +118,41 @@ In password hashing, **iterations** mean applying the hash function **multiple t
 
 This massively delays dictionary and brute force attacks.
 
-example:
+#### How iteractions work:
 
-original password (password + salt + hash) → `"MySecurePassword123abc123randomsalt"`
+Let's say the input to the hash is:
 
-***Iteration 1 → hash1 = ("***`MySecurePassword123abc123randomsalt`***")  = "c33a3752dcbe…”***
+    "MySecurePassword123abc123randomsalt"
 
-**`Hash 1** Output = ***"c33a3752dcbe…”***`
+I'm applying a simplified 3-step iteration example *(in reality, need to use something like 150,000 iterations)*:
 
-***Iteration 2 → hash2 = (“`c33a3752dcbe…`") = “b1f960a046ce…”***
+***Iteration 1:***
 
-**`Hash 2** Output = ***"b1f960a046ce…”***`
+Hash the original input:
 
-***Iteration 3 → hash3 =*** (”**`*b1f960a046ce…*`**”) = **“487e0fa52e16…”**
+> ***hash1 =*** ("MySecurePassword123abc123randomsalt") 
 
-**`Hash 3** Output = ***"*487e0fa52e16…*”***`
+→ **Output:** `"c33a3752dcbe..."`
 
-You can now imagine the same thing happening **100,000 times** — only the last result is stored in the database.
+***Iteration 2:***
 
-### Pepper
+Now take the output of the `hash1` and hash it again:
 
-**Pepper** is a secret value (a string) that is added to the user's password *before hashing for extra protection.* Unlike salts which are unique per user, the pepper is the same across all passwords. It provides an additional obstacle for leaked password databases. If the pepper isn’t known, brute forcing hashes is extremely difficult.
+> ***hash2 =*** ("c33a3752dcbe...")
 
-Even if someone steals the database (which includes salts and hashed passwords), they **still can’t recreate the original hash** without knowing the pepper. That’s because the **input to the hash is incomplete**.
+→ **Output:** `"b1f960a046ce..."`
 
-example:
+***Iteration 3:***
 
-**1 – You retrieve the pepper from the system (usually from the `.env` file or a secrets manager)**
+Now take the output of the `hash2` and hash it again:
 
-→ e.g. `"SECRET_PEPPER"`
+> ***hash3 =*** ("b1f960a046ce...")
 
-→ This is a **secret string**, the same for every user, and **not stored in the database**
+→ **Output:** `"487e0fa52e16..."`
 
-**2 – You combine the password, the salt, and the pepper**
+Each iteration uses the result (output) of the previous one — not the original password again. Only the final output (after all iterations) is stored in the database.
 
-→ e.g. `"MySecurePassword123"` (password)
 
-- `"abc123randomsalt"` (salt)
-- `"SECRET_PEPPER"` (pepper)
-
-→ Result:
-
-`"MySecurePassword123abc123randomsaltSECRET_PEPPER"`
 
 ## Python Credentials Storage Process
 
@@ -121,52 +161,71 @@ With these concepts in mind, let’s outline the secure credentials workflow:
 ### Registration – Storing Credentials
 
 1. User enters their credentials (username and password)
+
 2. System generates a unique salt
 3. System retrieves the secret pepper from secure storage
-4. System combines: password + salt + pepper
-5. System hashes the combined string using multiple iterations (e.g. 150,000)
-6. System stores in the database: username, salt, final hashed password
+4. System combines: password + pepper 
+5. System hashes the result using the salt and multiple iterations (e.g. 150,000)
+6. System stores in the database:
+    - `Username` -> as text
+    - `Salt` -> hex-encoded
+    - `hashed password` -> hex-encoded
 
-![Registration Flow](./assets/register-flow.png)
+```mermaid
+graph LR
+  A[User inputs username and password] --> B[Add PEPPER]
+  B --> C[Generate SALT]
+  C --> D[Hash using password + PEPPER and SALT<br/>with multiple iterations]
+  D --> E[Store username, SALT, and HASH in database]
+```
 
 ### Authentication Workflow (Login)
 
 1. User enters their credentials (username and password)
-2. System retrieves the stored salt and hashed password from the database
-3. System retrieves the pepper from secure storage
-4. System combines: entered password + stored salt + pepper
-5. System hashes the combined string using the same number of iterations
-6. System compares the result with the stored hashed password
-7. If they match → access granted; otherwise → access denied
 
-![Authentication Flow](./assets/login-flow.png)
+2. System retrieves the stored salt and hashed password for that user from the database
+3. System retrieves the pepper from (`.env` or a secrets manager)
+4. System combines: entered password + pepper
+5. System re-hashes this combination using the stored salt and same iterations
+6. System compares the result with the stored hashed password
+7. Access granted or denied
+    - **Match ->** User authenticated
+    - **Mismatch ->** invalid password
 
 So now we’ll explore how each step is implemented in Python.
 
-## Project Architecture
+```mermaid
+graph LR
+  A[User inputs username and password] --> B[Retrieve SALT and HASH from DB]
+  B --> C[Add PEPPER]
+  C --> D[Hash using password + PEPPER and SALT<br/>with same iterations]
+  D --> E[Compare result wit0h stored HASH]
+  E --> F{Do hashes match?}
+  F -- Yes --> G[Access granted]
+  F -- No --> H[Access denied]
+```
 
-simple-login-system
+## Project Structure
 
-- app/
-    - config.py
-    - credential_manager.py
-    - main.py
+SECURE-AUTH-STORAGE
+- src/
+    - main.py -> CLI entry point / user interface
+    - auth.py -> Handles authentication logic and validation
+    - db.py -> DataBase setup
+    - password.py -> Password hashing and verification
+    - settings.py -> Loads environment variables 
+    - logger.py -> setting up logging behaviour 
+
+    - tests/
 - .env
 - requirements.txt
+- docker-compose.yml
+- README.md
+
 
 ## Implementation
 
-### **1. Started with the CLI structure**
-
-- I created a file called `main.py` inside the `app/` folder
-- Built a simple **menu interface** that lets the user:
-    - Register a new account
-    - Log in to an existing account
-    - Exit the program
-- Used `input()` for user interaction
-- Delegated actual logic (hashing, storing, verifying) to `credential_manager.py`
-
-### 2. Install Dependencies
+### 1. Install Dependencies
 
 → python-dotenv
 
@@ -180,8 +239,9 @@ Add these dependencies to `requirements.txt`
 - `secrets` for generating secure salt
 - `os` for reading environment variables
 - `hmac` for secure comparison
+- `getpass` prompts the user for a password without echoing
 
-### **3. Designed Password Security Strategy**
+### **2. Designed Password Security Strategy**
 
 At this point, I defined the **security plan** for how password storage would work:
 
@@ -198,13 +258,21 @@ This approach makes password storage far more secure than basic hashing.
 
 ## 4. Project Setup and Constants
 
-### 4.1. Load Environment Variables and Define Constants
+### 4.1. Started with the CLI structure
 
-Preparing important configuration values that your program will use later.
+- I created a file called `main.py` inside the `src/` folder;
+- In the `main.py` file I builted a simple **menu interface** that lets the user:
+    - Register a new account
+    - Log in to an existing account
+    - Exit the program
+- Used `input()` for user interaction
+- Delegated all actual logic *(validation, hashing, storage, verification)* to `auth.py`, `password.py` and `db.py`
 
-- I **created a file** called `config.py` to centralize and manage all critical environment variables used across the application.
+### 4.2. Load Environment Variables and Define Constants
+
+I **created a file** called `settings.py` to centralize and manage environment variables used across the application.
     
-    ```python
+```python
     from dotenv import load_dotenv
     import os
     
@@ -223,41 +291,43 @@ Preparing important configuration values that your program will use later.
     DB_USER = require_env("DB_USER")
     DB_PASSWORD = require_env("DB_PASSWORD")
     DB_HOST = require_env("DB_HOST")
+```
     
-    ```
-    
-    - It uses `load_dotenv()` to load sensitive values from a `.env` file into the environment before anything else runs.
-    - It defines a helper function `require_env()` that:
-        - retrieves an environment variable,
-        - and raises a `ValueError` if the variable is not set.
-    - Values like `HASH_NAME` and `ITERATIONS` include default values:
-        - `"sha256"` for the hashing algorithm,
-        - `150_000` iterations for `pbkdf2_hmac()`.
-- **Setup the `.env` file** at the root of the project ****to define sensitive values like `PEPPER` , database credentials and hashing parameters. These variables will be loaded using `config.py` and accessed throughout the application.
-    
-    ```python
-    # File .env
-    
-    PEPPER="peppersecret"
-    ITERATIONS = 150_000
-    HASH_NAME = "sha256"
-    
-    DB_NAME="DB_NAME"
-    DB_USER="DB_USER"
-    DB_PASSWORD=securepassword
-    DB_HOST=localhost
-    ```
-    
-- I **created a file** called `credential_manager.py` to centralize all logic related to user authentication and database access.
+- Uses `load_dotenv()` to load sensitive values from a .env file.
+- Defines `require_env()` to validate that required variables are set.
+- Values like `HASH_NAME` and `ITERATIONS` include default values:                                    -
+- Default values are provided for: 
+    - `HASH_NAME` = "sha256"
+    - `ITERATIONS` = 150_000
+- **Setup the `.env` file** at the root of the project to define sensitive values like `PEPPER` , database credentials and hashing parameters. These variables will be loaded using `settings.py` and accessed throughout the application.
 
+Your `.env` file might look like this:
+    
+```python
+    # File .env
+
+    PEPPER="SECRET_KEY"
+    ITERATIONS = 150000
+    HASH_NAME = "sha256"
+
+    PYTHONPATH=src
+
+    DB_NAME=login_system
+    DB_USER=auth_user
+    DB_PASSWORD=mysecurepassword
+    DB_HOST=localhost
+```
 ## 5. Hashing Function
 
 ### 5.1 Create Hash Function
 
+**Defined in:** `password.py`
+
 ```python
 def hash_password(password: str, salt: bytes) -> bytes:
-	password_peppered = password.encode() + PEPPER
-	return hashlib.pbkdf2_hmac(HASH_NAME, password_peppered, salt, ITERATIONS)
+    try:
+        password_peppered = password.encode() + PEPPER
+        return hashlib.pbkdf2_hmac(HASH_NAME, password_peppered, salt, ITERATIONS)
 ```
 
 - It receives:
@@ -268,7 +338,7 @@ def hash_password(password: str, salt: bytes) -> bytes:
 - Calls `hashlib.pbkdf2_hmac()` using:
     - SHA-256 as the internal hashing algorithm,
     - the combined password + pepper,
-    - the salt provided for this user,
+    - the salt provided for this user *(I will explain how it's generated later in the registration section.)*
     - 150,000 iterations.
 - **Returns Bytes →** Hash is returned in binary format for DB storage or comparison.
 
@@ -276,6 +346,7 @@ def hash_password(password: str, salt: bytes) -> bytes:
 
 ### 6.1. Connect to PostgreSQL
 
+**Defined in:** `db.py`
 ```python
 def get_connection():
     return psycopg2.connect(
@@ -287,94 +358,124 @@ def get_connection():
     )
 ```
 
-- Retrieves PostgreSQL connection settings from constants defined in `config.py`.
+- Retrieves PostgreSQL connection settings from constants defined in `settings.py`.
 
-### 6.2. Initialise DataBase and Create User Table
+### 6.2. Query Functions
+
+**Defined in:** `db.py`
+
+***Select* Query:**
 
 ```python
-def setup_db_table():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    username TEXT PRIMARY KEY,
-                    salt TEXT NOT NULL,
-                    hashed_password TEXT NOT NULL
-                );
-            """)
-            conn.commit()
+def select_db(query: str, vars, func_name: str):
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, vars)
+                return cur.fetchall()
+    except psycopg2.Error as e:
+        logger.error(f"Database error during {func_name}: {e}")
+        raise
+```
+***Insert* Query:**
+
+```python
+def insert_db(query: str, vars, func_name:str):
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query,vars)
+                conn.commit()
+               
+    except psycopg2.Error as e:
+        logger.error(f"Database error during {func_name}: {e}")
+        raise
+```
+- Both functions handle exceptions and log errors using the `func_name` passed in the call.
+
+- `insert_db()` is used for **INSERT**, **CREATE**, and other write operations.
+
+- `select_db()` is used for fetching data from the database.
+
+### 6.3. Initialise DataBase table
+
+**Defined in:** `db.py`
+
+```python
+def setup_user_table():
+    insert_db(
+        "CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, salt TEXT NOT NULL, hashed_password TEXT NOT NULL);",
+        (),
+        "setup_user_table"
+    )
+    logger.info("Users table initialized.")
 ```
 
-- Creates the `users` table if it doesn’t exist.
-- Creates a table with `username`, `salt` and `hashed_password`
-- `salt` and `hash` are stored as hex strings.
+- Creates the users table with `username`, `salt`, and `hashed_password`
+
+- Uses `insert_db()` for creation logic
+
+- Logs a message when the table is ready
+
 
 ## 7. User Registration
 
 ### 7.1. Store Credentials
+
+
+**Defined in:** `auth.py`
 
 ```python
 def store_credentials(username: str, password: str) -> None:
 ```
 
 - The function takes two string arguments: `username` and `password`.
-- **Input Validation**
-    - Username is not empty and follows pattern.
-    - Password is not empty and at least 8 characters.
+
+- **Input Validation:**
+
+```python
+# Validate Username
+
+if not username.strip():
+        raise ValueError("Username cannot be empty.")
+    if not is_valid_username(username):
+        raise ValueError("Username can only contain letters, digits, and underscores.")
+
+# Validate Password
+
+    if not password.strip():
+        raise ValueError("Password cannot be empty.")
+    if not is_valid_password(password):
+        raise ValueError("Password must be at least 8 characters long.")
+```
+
+- **Generate Salt + Hash:**
+
+```python
+# Generate Salt
+salt = secrets.token_bytes(16)
+
+# Hashed Password + Salt
+hashed = hash_password(password, salt)
+```
+- Uses `secrets.token_bytes(16)` to generate a secure salt.
+
+- Hashes the password using the salt and pepper with `hash_password()` from `password.py`
+
+
+- **Store in DataBase:**
     
-    ```python
-    # Validate Username
-    
-    if not username or not username.strip():
-            raise ValueError("Username cannot be empty.")
-        if not re.match(r"^[a-zA-Z0-9_]+$", username):
-            raise ValueError("Username can only contain letters, digits, and underscores.")
-            
-            
-     # Validate Password
-     
-        if not password or not password.strip():
-            raise ValueError("Password cannot be empty.")
-        if len(password) < 8:
-            raise ValueError("Password must be at least 8 characters long.")
-        if not re.match(r"^[a-zA-Z0-9_]+$", password):
-            raise ValueError("Password can only contain letters, digits, and underscores.")
-    ```
-    
-- **Generate Salt + Hash**
-    
-    ```python
-    #Generate Unique Salt
-    salt = secrets.token_bytes(16)
-    
-    #Hashed Password + Salt
-    hashed = hash_password(password, salt)
-    ```
-    
-    - Creates a 16-byte cryptographically secure random salt for this user.
-    - Calls the `hash_password()` function with the salt and pepper included.
-- **Store in DataBase**
-    
-    ```python
-    with get_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "INSERT INTO users (username, salt, hashed_password) VALUES (%s, %s, %s)",
-                    (username, salt.hex(), hashed.hex())
-                )
-                conn.commit()
-    ```
-    
-- Opens a DataBase connection
-- Converts salt and hash to hex for storage
-    
-    ```python
-    cur.execute(
-                    "INSERT INTO users (username, salt, hashed_password) VALUES (%s, %s, %s)",
-                    (username, salt.hex(), hashed.hex())
-                )
-    ```
-    
+```python
+insert_db("INSERT INTO users (username, salt, hashed_password) VALUES (%s, %s, %s)", 
+              (username, salt.hex(), hashed.hex(),), "store_credentials")
+
+logger.info(f"User '{username}' registered successfully.")
+```
+- Converts both salt and hash to hexadecimal before storing in the database.
+
+- Uses `insert_db()` for insertion and logging.
+
+- Logs a success message after registration
 
 ## 8. Login and Validation
 
@@ -382,85 +483,106 @@ def store_credentials(username: str, password: str) -> None:
 
 ```python
 def verify_credentials(username: str, password: str) -> bool:
-with get_connection() as conn:
-        with conn.cursor() as cur:
 ```
-
 - Takes two arguments:
     - `username`: the user’s login name
-    - `password`: the password they typed into the CLI
+    - `password`: the password that user typed into the CLI
 - Returns `True` or `False` depending on whether authentication succeeds.
-- Opens a DataBase connection
-- **Fetch Stored Data**
-    
-    ```python
-    cur.execute(
-                    "SELECT salt, hashed_password FROM users WHERE username = %s",
-                    (username,)
-                )
-                row = cur.fetchone()
-    ```
-    
-    - Fetch the `salt` and `hashed_password` for the given `username`
-    - `cur.fetchone()` retrieves the first matching row from the result (or `None` if not found).
+
+- **Fetch Stored Data:**
+
+```python
+result = select_db(
+    "SELECT salt, hashed_password FROM users WHERE username = %s",
+    (username,),
+    "verify_credentials"
+    )
+```
+ - Uses `select_db()` to retrieve `salt` and `hashed_password` for the given user.
+ 
 - **Handle Unknown User**
-    
-    ```python
-    if row is None:
-       return False
-    ```
-    
-    - If the username doesn’t exist in the DataBase authentication fails.
-- **Hash Input Again**
-    
-    ```python
-    # Decode Salt
-    salt_hex, hashed_stored = row
-    salt = bytes.fromhex(salt_hex)
-    
-    # Hash the input password
-    hashed_input = hash_password(password, salt).hex()
-    ```
-    
-    - The stored salt is in **hex format**, so it converts it back to `bytes` using `.fromhex()`.
-    - Recomputes the hash using the input `password` and the retrieved `salt`.
-    - `.hex()` converts the output to match the stored format in DataBase.
+
+```python
+if not result:
+        logger.warning(f"Login attempt for non-existent user: '{username}'")
+        return False
+```
+- If user does not exist, logs a warning and returns `False`
+
 - **Compare Hashes**
     
     ```python
-    return hmac.compare_digest(hashed_input, hashed_stored)
+    salt, stored_hash = bytes.fromhex(result[0][0]), result[0][1]
+    return verify_password(password, salt, stored_hash)
     ```
     
-    - Compares the freshly computed hash with the stored hash.
-    - `hmac.compare_digest()` used to avoid timing attacks.
+    - The stored salt is in **hex format**, so it converts it back to `bytes` using `.fromhex()`.
+    - Calls `verify_password()` from `password.py` to compare the freshly computed hash with the stored hash.
 
 ## 9. Username Checks
 
 ### 9.1. Check if user already exists
 
+**Defined in:** `auth.py`
+
 ```python
 def user_exists(username: str) -> bool:
 ```
-
 - Takes one argument `username`
-    - Returns `True` or `False` if user already exist.
-- **Open DataBase connection**
-    
-    ```python
-    with get_connection() as conn:
-    	    with conn.cursor() as cur:
-    ```
+- Returns `True` or `False` if user already exist.
     
 - **Run Existence Query**
     
-    ```python
-    cur.execute(
-                    "SELECT 1 FROM users WHERE username = %s",
-                    (username,)
-                )
-    ```
-- **Check Result**
-    
-    ```python
-    return cur.fetchone() is not None
-    ```
+```python
+result = select_db("SELECT COUNT(*) FROM users WHERE username = %s", (username,), "user_exists")
+return result[0][0] > 0 
+```
+- Used `select_db()` to check if a user with the given username exists
+- The query returns a count of matching rows, and the function returns `True` if that count is greater than zero
+
+## How to run
+Before you start, make sure you have **Docker installed and running** on your machine.
+
+This project uses Docker to run a PostgreSQL database. You do **not** need to install PostgreSQL manually — the database will run inside a container defined by the `docker-compose.yml` file (which is already included in this repository).
+
+### 1. Clone the repository and setup environment:
+
+First, **clone the repository** and then in your terminal, run the following:
+
+```bash
+cd secure-auth-storage
+```
+```bash
+cp .env.example .env
+```
+This will:
+
+- Move you into the project folder
+
+- Create your own `.env` configuration file based on the example provided.
+
+    ⚠️ Don't forget to update the `.env` file with your custom secrets if needed (like the PEPPER and DB credentials).
+
+### 2. Start the database using Docker:
+
+Make sure the `docker-compose.yml` file is in the project root — it's already included in this repository.
+
+Then, run:
+
+```bash
+docker-compose up -d
+```
+This command will launch a PostgreSQL database container in the background, using the configuration defined in the `docker-compose.yml` file.
+
+### 3. Run the CLI application
+
+in your terminal, run the following:
+
+```bash
+export PYTHONPATH=src
+```
+
+```bash
+python3 src/main.py
+```
+The CLI will start, and you’ll be able to register and log in users through a clean terminal interface.
