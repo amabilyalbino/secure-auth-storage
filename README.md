@@ -1,6 +1,5 @@
 **Built With:** Python 3.12, PostgreSQL, Docker  
 **Security Focus:** Hashing + Salting + Peppering  
-Includes Unit Tests with pytest
 
 ## Overview
 
