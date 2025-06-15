@@ -3,13 +3,11 @@
 
 ## Overview
 
-This project is a Python CLI system for storing and validating user credentials using **hashing, salting, and peppering**.
-
- It was built from scratch to understand and apply real-world password protection practices, using **PBKDF2 with SHA-256**, environment-based **pepper**, and a **PostgreSQL database inside Docker**. The goal was to move beyond basic hashing and create a beginner-friendly, yet technically solid, example of how to handle credentials securely.
+This project is a Python CLI-based authentication system for storing and validating user credentials using **hashing, salting, and peppering**.
 
 ## Learning Motivation
 
-When I started learning about secure password storage, I couldn’t find clear, beginner-friendly examples that combined **hash + salt + pepper** in a simple, real-world Python CLI project. So I decided to build one from scratch — to understand how each piece works and how to implement them together in a practical way.
+When I started learning about secure password storage in Python, I couldn’t find clear, beginner-friendly examples that combined **hash + salt + pepper** in a simple, real-world Python CLI project. So I decided to build one from scratch, to understand how each piece works and how to implement them together in a practical way.
 
 - How and why to use hashing
 - What role salt and pepper play in security
@@ -41,9 +39,40 @@ The hash function will convert the `User password` *(MySecurePassword123)* to by
 >**User password** *hashed*: a47ef47e8d5bd2852ef74bc1a0f8f0e38c1fa4c7aa9bd80f5b41bffbdd460a37
 
 > [!IMPORTANT]  
-> However, using hashing alone is not secure enough — If two users pick the same password like “123456789”, the hash for this users will be the same. This makes hash collisions more likely for identical passwords. 
+> However, using hashing alone is not secure enough, if two users pick the same password, the hash for this users will be the same. This makes hash collisions more likely for identical passwords. 
 >
 >Attackers can use precomputed tables (like rainbow tables) or brute-force methods to reverse common hashes. That’s why secure implementations also use **salt**, **pepper**, and **iterations** to strengthen the hash.
+
+### What is Salting?
+
+Salting is the process of adding a unique, randomly generated value (called a salt) to each user's password before hashing it. This ensures that even if two users choose the same password, their stored hashes will be different.
+
+Salting protects against:
+- **Rainbow table attacks** (precomputed hashes of common passwords)
+
+- **Hash collisions** for users with identical passwords
+
+So basically, it’s a **random value** that we **generate** and **attach to the password before hashing**.
+
+**1. Generate a unique salt** *( I will explain later how )*
+
+A cryptographically random byte string is generated for *each user*.
+
+Example of a salt string:
+
+> "xyz789randomSalt"
+
+This is just a random string, it should be different for every *single user*.
+
+**2. Combine password and salt**
+
+The password and salt are combined — not by merging them as text, but during hashing. The salt is used as part of the hashing process, not just glued onto the password.
+
+**3. Hash the combination**
+
+>**→ Output hash:** "a47ef47e8d5bd2852ef74bc1a0f8f0e38c1fa4c7aa9bd80f5b41bffbdd460a37"
+
+So the salt isn’t hashed by itself, it’s part of the password input before hashing. It simply makes each hash result unique, even if two users have the same password.
 
 ### Pepper
 
@@ -77,39 +106,6 @@ This combination encoded to bytes and passed into the hash function.
 The combined string is encoded to bytes and sent into the hash function — later, the salt is added as a separate argument inside the hash process *(you’ll see this next)*.
 
 The salt is added to the combination during the hashing process.
-
-### What is Salting?
-
-Salting is the process of adding a unique, randomly generated value (called a salt) to each user's password before hashing it. This ensures that even if two users choose the same password, their stored hashes will be different.
-
-Salting protects against:
-- **Rainbow table attacks** (precomputed hashes of common passwords)
-
-- **Hash collisions** for users with identical passwords
-
-So basically, it’s a **random value** that we **generate** and **attach to the password before hashing**.
-
-**1. Generate a unique salt** *( I will explain later how )*
-
-A cryptographically random byte string is generated for *each user*.
-
-Example of a salt string:
-
-> "xyz789randomSalt"
-
-This is just a random string, it should be different for every *single user*.
-
-**2. Combine password and salt**
-
-The password and salt are combined — not by merging them as text, but during hashing. The salt is used as part of the hashing process, not just glued onto the password.
-
-**3. Hash the combination**
-
->**→ Output hash:** "a47ef47e8d5bd2852ef74bc1a0f8f0e38c1fa4c7aa9bd80f5b41bffbdd460a37"
-
-So the salt isn’t hashed by itself, it’s part of the password input before hashing. It simply makes each hash result unique, even if two users have the same password.
-
-
 
 ### **Iterations**
 
@@ -560,7 +556,8 @@ This will:
 
 - Create your own `.env` configuration file based on the example provided.
 
-    ⚠️ Don't forget to update the `.env` file with your custom secrets if needed (like the PEPPER and DB credentials).
+> [!IMPORTANT] 
+> Don't forget to update the `.env` file with your custom secrets if needed (like the PEPPER and DB credentials).
 
 ### 2. Start the database using Docker:
 
