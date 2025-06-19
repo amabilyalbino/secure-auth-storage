@@ -11,3 +11,5 @@ Hashing is a process that takes an input ***(like a password)*** and turns it in
 Once something is hashed, you can’t reverse it to get the original input. That’s why it’s called a one-way function — it's like putting something through a shredder with no way to put the pieces back together.
 
 Hashing is important for password storage because it means the system never has to save your actual password. Instead, it saves only the hash.
+
+![alt text](image.png)
