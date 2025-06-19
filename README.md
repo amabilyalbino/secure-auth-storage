@@ -3,7 +3,7 @@
 This project is a Python CLI-based authentication system for storing and validating user credentials using **hashing, salting, and peppering**.
 
 > [!WARNING]
-> This project was built for **learning purposes only** — to explore and understand secure password handling with **hash, salt, and pepper** using Python. - **Not for production**
+> This project was built for ***learning purposes only*** — to explore and understand secure password handling with hash, salt, and pepper using Python. **Not for production**
 
 # Learning Motivation
 
@@ -57,7 +57,7 @@ python3 src/main.py
 ```css
 SECURE-AUTH-STORAGE
 - src/
-    - main.py -> CLI entry point / user interface
+    - main.py -> Interactive CLI for user login
     - auth.py -> Handles authentication logic and validation
     - db.py -> DataBase setup
     - password.py -> Password hashing and verification
@@ -70,7 +70,7 @@ SECURE-AUTH-STORAGE
 - docker-compose.yml
 - README.md
 ```
-## 📖 Documentation
+# 📖 Documentation
 
 If you're curious about how hashing, salting, peppering, and iteration work in practice, or want to see how I learned and applied these concepts, the docs below walk through each concept and how i applied them in this project.
 
