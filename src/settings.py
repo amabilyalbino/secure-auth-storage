@@ -3,11 +3,13 @@ import os
 
 load_dotenv()
 
+
 def require_env(var_name: str) -> str:
-    value = os.getenv(var_name)
-    if not value:
-        raise ValueError(f"Missing required environment variable: {var_name}")
-    return value
+	value = os.getenv(var_name)
+	if not value:
+		raise ValueError(f"Missing required environment variable: {var_name}")
+	return value
+
 
 # Cryptographic configuration
 PEPPER = require_env("PEPPER").encode()

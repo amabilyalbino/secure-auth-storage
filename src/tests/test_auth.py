@@ -14,6 +14,7 @@ def setup_module(module):
             cur.execute("DELETE FROM users WHERE username LIKE 'test_user_%'")
             conn.commit()
 
+
 # Tests auth
 
 def test_user_registration_and_login():
@@ -27,6 +28,7 @@ def test_user_registration_and_login():
     assert user_exists(username)
     assert verify_credentials(username, password)
 
+
 def test_duplicate_username():
     username = f"test_user_{secrets.token_hex(4)}"
     password = "secureTestPass456"
@@ -35,12 +37,14 @@ def test_duplicate_username():
     with pytest.raises(psycopg2.IntegrityError):
         store_credentials(username, password)
 
+
 def test_invalid_password_too_short():
     username = f"test_user_{secrets.token_hex(4)}"
     short_password = "123"
 
     with pytest.raises(ValueError):
         store_credentials(username, short_password)
+
 
 def test_invalid_username():
     invalid_username = "invalid!user"
