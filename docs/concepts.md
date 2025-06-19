@@ -12,4 +12,6 @@ Once something is hashed, you can’t reverse it to get the original input. That
 
 Hashing is important for password storage because it means the system never has to save your actual password. Instead, it saves only the hash.
 
-![alt text](image.png)
+<p align="center">
+  <img src="assets/hash.png" alt="Descrição da imagem" width="300"/>
+</p>
