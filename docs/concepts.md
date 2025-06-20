@@ -144,3 +144,60 @@ The salt and the resulting hash are stored in the database.
 <p align="center">
   <img src="../assets/salting.png" alt="Descrição da imagem" width="80%"/>
 </p>
+
+## What is Pepper?
+
+Pepper is a secret string, that can be used in addition to salting to provide an additional layer of protection. While salts are unique per user and saved alongside the hash, pepper is the ***same for all users*** and kept hidden, usually in a secure secrets manager or a `.env` file. Like any other cryptographic key, a pepper rotation strategy should be considered.
+
+Even if an attacker gains access to the database *(with all salts and password hashes)*, they still can’t recreate the hash without knowing the pepper. That’s because the **input to the hash function is incomplete**.
+
+### How pepper works
+---
+
+<b>1. User creates a password (input):</b>
+
+```bash
+password = "MySecurePassword123"
+```
+
+<b> 2. Generate a unique salt *(per user)*</b>
+
+```bash
+"xyz789randomSalt"
+```
+
+<b> 3. Retrieve the pepper stored</b>
+
+Retrieve the pepper stored in `.env` or a secrets manager:
+
+```Python
+"PEPPER = "SECRET_PEPPER""
+```
+<b> 4. Combine password, salt and pepper (Concatenation) </b>
+
+The pepper is combined with the password and salt, typically by concatenating them. This creates a unique input for hashing.
+
+```bash
+password + salt + pepper = "MySecurePassword123xyz789randomSaltSECRET_PEPPER"
+```
+<b> 4. Hash the combined string:</b>
+
+The combined *password*, *salt* and *pepper* are passed through a cryptographic **hash function**, which produces a fixed-length string (hash).
+
+```bash
+Combined password + salt + pepper ("MySecurePassword123xyz789randomSaltSECRET_PEPPER") 
+↓
+Hash Output= ("a9e2d1bfe43c7d8e...")
+```
+<b> 5. Store the salt and the hash in the Database:</b>
+
+The salt and the resulting hash are stored in the database.
+
+```bash
+  "username": "Amy",
+  "salt": "xyz789randomSalt",
+  "hash": "a9e2d1bfe43c7d8e..."
+```
+<p align="center">
+  <img src="../assets/pepper.png" alt="Descrição da imagem" width="80%"/>
+</p>
