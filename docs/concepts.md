@@ -13,9 +13,8 @@ Once something is hashed, you can’t reverse it to get the original input. That
 Hashing is important for password storage because it means the system never has to save your actual password. Instead, it saves only the hash.
 
 
-### How hashing works
------
-
+**How hashing works**
+---
 >
 > → **User password:** *(input)* = "MySecurePassword123"
 > 
@@ -37,8 +36,9 @@ The hash function will convert the `User password` *(MySecurePassword123)* to by
 > Attackers can use <a href="#rainbow-tables"> precomputed tables (rainbow tables)</a> or <a href="#brute-force-methods"> brute-force methods</a> to reverse common hashes. That’s why secure implementations also use **salt**, **pepper**, and **iterations** to strengthen the hash.
 
 <details>
-<summary id ="rainbow-tables"><u>Precomputed Tables (Rainbow Tables)</u></summary>
-These are lookup tales that store precomputed hashes for a large list of possible passwords. Instead of hashing guesses one by one, the attacker looks up the hash in the table and finds the corresponding password.
+<summary id ="rainbow-tables"><u><b>Precomputed Tables (Rainbow Tables)</b></u></summary>
+<p>
+These are lookup tales that store precomputed hashes for a large list of possible passwords. Instead of hashing guesses one by one, the attacker looks up the hash in the table and finds the corresponding password.</p>
 
 > ***Rainbow*** refers to the different colors used in the table to show the various hashing and reduction functions and steps. With each reduction function being a different color, the final plaintexts and hashes would look like a rainbow.
 
