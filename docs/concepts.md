@@ -37,6 +37,8 @@ The hash function will convert the `User password` *(MySecurePassword123)* to by
 
 <details>
 <summary id ="rainbow-tables"><u><b>Precomputed Tables (Rainbow Tables)</b></u></summary>
+<p></p>
+<p><b>Definition:</b></p>
 <p>
 These are lookup tales that store precomputed hashes for a large list of possible passwords. Instead of hashing guesses one by one, the attacker looks up the hash in the table and finds the corresponding password.</p>
 
