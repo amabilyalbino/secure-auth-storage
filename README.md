@@ -75,7 +75,7 @@ SECURE-AUTH-STORAGE
 If you're curious about how hashing, salting, peppering, and iteration work in practice, or want to see how I learned and applied these concepts, the docs below walk through each concept and how i applied them in this project.
 
 - [Concepts of Secure Data Storage](docs/concepts.md)
-- [Secure Storage Workflow](docs/storage-workflow.md)
+- [Secure Storage Workflow](docs/workflow.md)
 - [My work process](docs/work-process.md)
 
 
