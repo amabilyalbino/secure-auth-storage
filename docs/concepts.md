@@ -142,7 +142,7 @@ The salt and the resulting hash are stored in the database.
 ```
 
 <p align="center">
-  <img src="../assets/salting.png" alt="Descrição da imagem" width="80%"/>
+  <img src="../assets/salting.png" alt="Descrição da imagem" width="87%"/>
 </p>
 
 ## What is Pepper?
@@ -199,5 +199,5 @@ The salt and the resulting hash are stored in the database.
   "hash": "a9e2d1bfe43c7d8e..."
 ```
 <p align="center">
-  <img src="../assets/pepper.png" alt="Descrição da imagem" width="80%"/>
+  <img src="../assets/pepper.png" alt="Descrição da imagem" width="87%"/>
 </p>
