@@ -127,7 +127,9 @@ password + salt = "MySecurePassword123xyz789randomSalt"
 The combined *password* and *salt* are passed through a cryptographic **hash function**, which produces a fixed-length string (hash).
 
 ```bash
-Combined password + salt ("xyz789randomSaltMySecurePassword123") → Hash Output= ("98a1cbe4735d...")
+Combined password + salt ("xyz789randomSaltMySecurePassword123") 
+↓
+Hash Output= ("98a1cbe4735d...")
 ```
 <b> 5. Store the salt and the hash in the Database:</b>
 
