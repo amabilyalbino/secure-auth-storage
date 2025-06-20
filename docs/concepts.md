@@ -43,7 +43,9 @@ These are lookup tales that store precomputed hashes for a large list of possibl
 > ***Rainbow*** refers to the different colors used in the table to show the various hashing and reduction functions and steps. With each reduction function being a different color, the final plaintexts and hashes would look like a rainbow.
 
 **How it works:**
-----
+<p>
+</p>
+
 1. The attacker creates a big list of passwords (like from a dictionary).
 
 2. They compute the hash of each one.
