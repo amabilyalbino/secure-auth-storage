@@ -4,23 +4,23 @@ This document explains how the authentication flow works in the Secure Auth Stor
 
 ## Registration Workflow - storing credentials
 
-### 1. User enters their credentials:
+<b>1. <u> User enters their credentials:</u></b>
   - Username 
   - Password
 
-### 2. Input Validation
+<b>2. <u> Input Validation</u></b>
 
-### 3. System generates a unique salt
+<b>3. <u> System generates a unique salt</u></b>
 
-### 4. System retrieves the pepper stored
+<b>4. <u> System retrieves the pepper stored</u></b>
 
-### 5. System combines: password + salt + pepper
+<b>5. <u> System combines: password + salt + pepper</u></b>
 
-### 6. Combine and Hash
+<b>6. <u> Combine and Hash</u></b>
   - Combine `password + salt + pepper`
   - Hash combination and apply iterations (e.g. 150,000 iterations)
 
-### 6. System stores in the database:
+<b>6. <u> System stores in the database:</u></b>
   - `Username` 
   - `Salt`
   - `hashed password` 
