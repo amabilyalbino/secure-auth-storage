@@ -38,3 +38,43 @@ C --> D[Hash using password + PEPPER and SALT<br/>with multiple iterations]
 D --> E[Store username, SALT, and HASH in database]
 
 ```
+## Authentication Workflow - Login
+
+<b>1. <u>User enters their credentials:</u></b>
+  - Username 
+  - Password
+
+<b>2. <u>Retrieve Stored Values</u></b>
+  - Fetch `salt` and `hashed_password` from database
+  - Retrieves pepper stored
+
+<b>3. <u>Re-Hash the input</u></b>
+  - Combine entered password + pepper + stored salt - just like it did during registration
+  - Hash it again using the same number of iterations
+
+<b>4. <u>Compare Hashes</u></b>
+
+  - **Then it checks:** does this new hash equal the one stored in the database?
+  
+    - If yes → login is successful
+    - If not → access is denied
+
+```mermaid
+
+graph LR
+
+A[User inputs username and password] --> B[Retrieve SALT and HASH from DB]
+
+B --> C[Add PEPPER]
+
+C --> D[Hash using password + PEPPER and SALT<br/>with same iterations]
+
+D --> E[Compare result wit0h stored HASH]
+
+E --> F{Do hashes match?}
+
+F -- Yes --> G[Access granted]
+
+F -- No --> H[Access denied]
+
+```
