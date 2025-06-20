@@ -201,3 +201,56 @@ The salt and the resulting hash are stored in the database.
 <p align="center">
   <img src="../assets/pepper.png" alt="Descrição da imagem" width="90%"/>
 </p>
+
+## What is Iterations?
+
+Iteration refers to the process of repeating a sequence of operations or instructions multiple times, with the output of each repetition used as the input for the next.
+
+Iterative hashing involves run the hash function several times rather than once. Each time, the output of the previous hash is used as the input for the next one. This process increases the time needed to compute each hash, making it much harder for attackers to crack passwords using brute-force methods.
+
+The number of iterations can vary depending on security requirements, more iterations improve security by making it more difficult for attackers to hack, however, they may slow down the login process. Since computers get faster over time, the number of iterations should be reviewed and increased periodically to stay secure.
+
+### How iterations works
+---
+Let's say the input to the hash function is:
+
+```bash
+Hash Function (input) = "MySecurePassword123xyz789randomSaltSECRET_PEPPER"
+```
+I'm applying in this example a simplified 3-step iteration *(In real applications, it’s usually around 100,000 to 600,000 iterations)*:
+
+🔁 <u><b>Iteration 1: </b> </u>
+----
+Apply the hash function to the original input:
+
+```python
+hash1 = hash("MySecurePassword123xyz789randomSaltSECRET_PEPPER")
+↓
+hash1 output = "c33a3752dcbe..."
+```
+🔁 <u><b>Iteration 2: </b> </u>
+----
+Now take the output of the `hash1` and hash it again:
+
+```python
+hash2 = hash("c33a3752dcbe...")
+↓
+hash2 output = ("b1f960a046ce...")
+```
+🔁 <u><b>Iteration 3: </b> </u>
+----
+Now take the output of the `hash2` and hash it again:
+
+```python
+hash3 = hash("b1f960a046ce...")
+↓
+hash3 output = ("487e0fa52e16...")
+```
+
+> [!IMPORT]
+>
+> Only the final output *(after all iterations)* is stored in the database.
+
+<p align="center">
+  <img src="../assets/iterations.png" alt="Descrição da imagem" width="90%"/>
+</p>
