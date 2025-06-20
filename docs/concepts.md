@@ -15,11 +15,15 @@ Hashing is important for password storage because it means the system never has 
 
 ### How hashing works:
 
-> :: **User password:** *(input)* = "MySecurePassword123"
+>
+> → **User password:** *(input)* = "MySecurePassword123"
+> 
 
 The hash function will convert the `User password` *(MySecurePassword123)* to bytes and hash it.
 
-> :: **User password:** *(Hashed)* = "a47ef47e8d5bd2852ef74bc1a0f8f0e38c1fa4c7aa9bd80f5b41bffbdd460a37"
+>
+> → **User password:** *(Hashed)* = "a47ef47e8d5bd2852ef74bc1a0f8f0e38c1fa4c7aa9bd80f5b41bffbdd460a37"
+>
 
 <p align="center">
   <img src="../assets/hash.png" alt="Descrição da imagem" width="85%"/>
