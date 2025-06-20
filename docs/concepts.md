@@ -13,7 +13,8 @@ Once something is hashed, you can’t reverse it to get the original input. That
 Hashing is important for password storage because it means the system never has to save your actual password. Instead, it saves only the hash.
 
 
-### How hashing works:
+### How hashing works
+-----
 
 >
 > → **User password:** *(input)* = "MySecurePassword123"
