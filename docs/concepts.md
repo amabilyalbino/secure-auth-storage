@@ -252,5 +252,5 @@ hash3 output = ("487e0fa52e16...")
 > Only the final output *(after all iterations)* is stored in the database.
 
 <p align="center">
-  <img src="../assets/iterations.png" alt="Descrição da imagem" width="90%"/>
+  <img src="../assets/iterations.png" alt="Descrição da imagem" width="87%"/>
 </p>
