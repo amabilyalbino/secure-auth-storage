@@ -43,8 +43,6 @@ These are lookup tales that store precomputed hashes for a large list of possibl
 > ***Rainbow*** refers to the different colors used in the table to show the various hashing and reduction functions and steps. With each reduction function being a different color, the final plaintexts and hashes would look like a rainbow.
 
 **<u>How it works:</u>**
-<p>
-</p>
 
 <b>1.</b> The attacker creates a big list of passwords (like from a dictionary).
 
@@ -66,8 +64,6 @@ A brute-force attack is a method where an attacker tries every possible combinat
 > They try every possible combination until one works. The attacker doesn’t need to know anything about the password, they just try everything.
 
 **<u>How it works:</u>**
-<p>
-</p>
 
 <b>1.</b> The attacker knows the hash of a password (e.g., from a leaked database).
 
