@@ -42,43 +42,46 @@ These are lookup tales that store precomputed hashes for a large list of possibl
 
 > ***Rainbow*** refers to the different colors used in the table to show the various hashing and reduction functions and steps. With each reduction function being a different color, the final plaintexts and hashes would look like a rainbow.
 
-**How it works:**
+**<u>How it works:</u>**
 <p>
 </p>
 
-1. The attacker creates a big list of passwords (like from a dictionary).
+<b>1.</b> The attacker creates a big list of passwords (like from a dictionary).
 
-2. They compute the hash of each one.
+<b>2.</b> They compute the hash of each one.
 
-3. Store in a table:
+<b>3.</b> Store in a table:
 ```bash
 password → hash  
 "123456" → e10adc3949ba59abbe56e057f20f883e
 ```
-4. Later, if they find a password hash (e.g. from a database leak), they can search in the table to reverse it.
+<b>4.</b> Later, if they find a password hash (e.g. from a database leak), they can search in the table to reverse it.
 </details>
 
 <details>
-<summary id ="brute-force-methods"><u>Brute Force Methods</u> </summary>
-A brute-force attack is a method where an attacker tries every possible combination of characters until the correct one is found. It’s slow but guaranteed to work eventually, if there's no protection like account lockouts or rate limiting.
+<summary id ="brute-force-methods"><u><b>Brute Force Methods</b></u> </summary>
+<p>
+A brute-force attack is a method where an attacker tries every possible combination of characters until the correct one is found. It’s slow but guaranteed to work eventually, if there's no protection like account lockouts or rate limiting.</p>
 
 > They try every possible combination until one works. The attacker doesn’t need to know anything about the password, they just try everything.
 
-**How it works:**
----
-1. The attacker knows the hash of a password (e.g., from a leaked database).
+**<u>How it works:</u>**
+<p>
+</p>
 
-2. They pick a list of possible characters: `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%`
+<b>1.</b> The attacker knows the hash of a password (e.g., from a leaked database).
 
-3. They generate passwords starting from shortest to longest:
+<b>2.</b> They pick a list of possible characters: `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%`
+
+<b>3.</b> They generate passwords starting from shortest to longest:
   - a
   - b
   - c
   - aa
   - ab
   - etc ....
-4. Each guess is hashed and compared with the stored hash.
 
-5. If it matches, they found the original password.
+<b>4.</b> Each guess is hashed and compared with the stored hash.
 
+<b>5.</b> If it matches, they found the original password.
 </details>
