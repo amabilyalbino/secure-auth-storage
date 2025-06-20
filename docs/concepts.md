@@ -247,7 +247,7 @@ hash3 = hash("b1f960a046ce...")
 hash3 output = ("487e0fa52e16...")
 ```
 
-> [!IMPORT]
+> [!IMPORTANT]
 >
 > Only the final output *(after all iterations)* is stored in the database.
 
