@@ -149,4 +149,73 @@ def hash_password(password: str, salt: bytes) -> bytes:
 
 ➌ - **Returns:**
 
-    - A derived password hash in raw bytes format.
+- A derived password hash in raw bytes format.
+
+### Store Credentials
+--- 
+
+→ **Defined in:** `auth.py`
+
+This function is responsible for orchestrating the process of credential storage. 
+
+It validates inputs, generates the salt, calls `hash_password()` function to perform the hashing and store the output in the database.
+
+```python
+def store_credentials(username: str, password: str) -> None:
+
+	if not username.strip():
+		raise ValueError("Username cannot be empty.")
+	if not is_valid_username(username):
+		raise ValueError("Username can only contain letters, digits, and underscores.")
+
+	if not password.strip():
+		raise ValueError("Password cannot be empty.")
+	if not is_valid_password(password):
+		raise ValueError("Password must be at least 8 characters long.")
+
+	salt = secrets.token_bytes(16)
+	hashed = hash_password(password, salt)
+
+	insert_db(
+		"INSERT INTO users (username, salt, hashed_password) VALUES (%s, %s, %s)",
+		(
+			username,
+			salt.hex(),
+			hashed.hex(),
+		),
+		"store_credentials",
+	)
+
+	logger.info(f"User '{username}' registered successfully.")
+```
+
+❶ - **Receives:**
+
+  - `username`: a string input provided by the user.
+  - `password`: a user-provided password as a string.
+
+➋ - **Process:**
+
+  - ***Validates the input:***
+
+    - Checks if username and password are not empty (after stripping whitespace).
+
+    - Ensures the username only contains letters, digits, or underscores using `is_valid_username()`.
+
+    - Ensures the password meets a minimum security requirement using `is_valid_password()`.
+
+  - ***Generates a salt:***
+
+    - Uses `secrets.token_bytes(16)` to create a 16-byte random salt for this user.
+
+  - ***Hashes the password (Call `hash_password()`)***
+
+  - ***Stores credentials in the database:***
+
+    - Converts both `salt` value and `hashed` output to hexadecimal (`salt.hex()`, `hashed.hex()`) before storing (so they can be stored as text).
+
+    - Calls `insert_db()` to insert the values into the `users` table.
+
+➌ - **Returns:**
+
+- Return (`None`)
