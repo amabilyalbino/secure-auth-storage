@@ -129,7 +129,7 @@ def hash_password(password: str, salt: bytes) -> bytes:
 		logger.error(f"Error hashing password: {e}")
 		raise
 ```
-➊ - **Receives:**
+❶ - **Receives:**
 
   - `password`: a user-provided password as a string
   - `salt:` randomly string generated
