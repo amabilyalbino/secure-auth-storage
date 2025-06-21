@@ -129,12 +129,12 @@ def hash_password(password: str, salt: bytes) -> bytes:
 		logger.error(f"Error hashing password: {e}")
 		raise
 ```
-❶ - **Receives:**
+➊ - **Receives:**
 
   - `password`: a user-provided password as a string
   - `salt:` randomly string generated
 
-❷ - **Process:**
+➋ - **Process:**
   - Converts the password to bytes using `.encode()`
 
   - Appends the secret `PEPPER` (loaded from `.env`) to the password
@@ -147,6 +147,6 @@ def hash_password(password: str, salt: bytes) -> bytes:
 
     - `150000` iterations 
 
-❸ - **Returns:**
+➌ - **Returns:**
 
     - A derived password hash in raw bytes format.
