@@ -57,12 +57,12 @@ python3 src/main.py
 ```css
 SECURE-AUTH-STORAGE
 - src/
-    - main.py -> Interactive CLI for user login
-    - auth.py -> Handles authentication logic and validation
-    - db.py -> DataBase setup
-    - password.py -> Password hashing and verification
-    - settings.py -> Loads environment variables 
-    - logger.py -> setting up logging behaviour 
+    - main.py → Interactive CLI for user login
+    - auth.py → Handles authentication logic and validation
+    - db.py → DataBase setup
+    - password.py → Password hashing and verification
+    - settings.py → Loads environment variables 
+    - logger.py → setting up logging behaviour 
 
     - tests/
 - .env
@@ -76,7 +76,7 @@ If you're curious about how hashing, salting, peppering, and iteration work in p
 
 - [Concepts of Secure Data Storage](docs/concepts.md)
 - [Secure Storage Workflow](docs/workflow.md)
-- [My work process](docs/work-process.md)
+- [My work process](docs/work_process.md)
 
 
 > [!IMPORTANT]  
