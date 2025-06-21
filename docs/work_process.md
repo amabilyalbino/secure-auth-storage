@@ -1,7 +1,7 @@
 # Implementation
 This section describes the full implementation process of the Secure Auth Storage CLI.
 
-- ① Setup and Envi
+- Setup and Envi
     - 1.1. 
 - [My work process](docs/work_process.md)
 
@@ -13,19 +13,20 @@ This section describes the full implementation process of the Secure Auth Storag
 -  A secret string called **pepper** is a value that must be created manually *(like a password or token)*, or it can be generated using the same secrets module used to generate the salt.
 - Number of **iterations** defined → `150000`
 
-**PBKDF2** is a cryptographic algorithm that uses **SHA-256** in multiple rounds to derive a secure hash. It combines the password + salt + pepper, and runs 150,000 iterations before producing the final output.
+> [!NOTE]
 >
+> **PBKDF2** is a cryptographic algorithm that uses **SHA-256** in multiple rounds to derive a secure hash. It combines the password + salt + pepper, and runs 150,000 iterations before producing the final output.
 
 ## Install Dependencies
 
 To start building the project, I first added the required libraries to the `requirements.txt` file. 
 
-- <b><u>External packages</u></b>
+- <b><ins>External packages</ins></b>
   
   - `python-dotenv` → to load environment variables from a .env file.
   - `psycopg2-binary` → to connect to the PostgreSQL database
 
-- <b><u>Built-in Python modules</u></b>
+- <b><ins>Built-in Python modules<ins></b>
 
   - `hashlib` — for password hashing with PBKDF2
   - `secrets` — to generate cryptographically secure salts (and optionally the pepper)
@@ -35,7 +36,7 @@ To start building the project, I first added the required libraries to the `requ
 
 ## Project Setup and Constants
 
-### ① CLI Structure
+### 1. CLI Structure
 ---
 I started by creating a file called `main.py` inside the `src/` folder. In this file, I built a simple menu-driven CLI interface that allows the user to:
 
@@ -54,7 +55,7 @@ All the core logic — such as *(validation, hashing, credential storage, and ve
 
   → `settings.py`
 
-### ② Environment Variables and Constants
+### 2. Environment Variables and Constants
 ---
 
 To manage environment variables and constants, I created a separate file called `settings.py`.
@@ -90,7 +91,7 @@ DB_HOST = require_env("DB_HOST")
 
 - `PEPPER` is read and encoded to bytes for hashing.
 
-#### ②.① Setup the `.env` file
+#### 2.1. Setup the `.env` file
 ----
 The `.env` file sits at the root of the project and defines sensitive values like the PEPPER, database credentials, and hashing configuration.
 
@@ -128,12 +129,12 @@ def hash_password(password: str, salt: bytes) -> bytes:
 		logger.error(f"Error hashing password: {e}")
 		raise
 ```
-① **Receives:**
+❶  **Receives:**
 
   - `password`: a user-provided password as a string
   - `salt:` randomly string generated
 
-② **Process:**
+❷ **Process:**
   - Converts the password to bytes using `.encode()`
 
   - Appends the secret `PEPPER` (loaded from `.env`) to the password
