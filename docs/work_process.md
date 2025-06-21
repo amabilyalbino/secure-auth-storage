@@ -16,7 +16,8 @@ This section describes the full implementation process of the Secure Auth Storag
   - [Hashing Function](#hashing-function)
   - [Store Credentials](#store-credentials)
   - [Verify Credentials](#verify-credentials)
-  - [Verify Password]() 
+  - [Verify Password](#verify-password) 
+  - [Database](#database) 
 
 ## Designed Password Security Strategy
 
@@ -133,7 +134,7 @@ This section explains how I implemented the secure processing of user credential
 
 ### Hashing Function 
 ---
-→ **Defined in:** `password.py`
+📌 **Defined in:** `password.py`
 
 This function is the core of the secure password workflow. Hashes a user password using PBKDF2 with SHA-256, pepper, salt and multiple iterations.
 
@@ -171,7 +172,7 @@ def hash_password(password: str, salt: bytes) -> bytes:
 ### Store Credentials
 --- 
 
-→ **Defined in:** `auth.py`
+📌 **Defined in:** `auth.py`
 
 This function is responsible for orchestrating the process of credential storage. 
 
@@ -239,7 +240,7 @@ def store_credentials(username: str, password: str) -> None:
 
 ### Verify Credentials
 ---
-→ **Defined in:** `auth.py`
+📌 **Defined in:** `auth.py`
 
 This function is responsible for validating a user's login attempt by retrieving the stored credentials from the database and comparing the provided password with the stored hash.
 
@@ -286,7 +287,7 @@ def verify_credentials(username: str, password: str) -> bool:
 
 ### Verify Password
 ---
-→ **Defined in:** `password.py`
+📌 **Defined in:** `password.py`
 
 Handles comparison between a freshly hashed password and a stored hash.
 
@@ -329,7 +330,7 @@ def verify_password(password: str, salt: bytes, expected_hash: str) -> bool:
 
 ### Database
 ---
-→ **Defined in:** `db.py`
+📌 **Defined in:** `db.py`
 
 This file manages everything related to talking to the database. It connects to the PostgreSQL database, runs queries, inserts data, and creates the table where user information is stored.
 
