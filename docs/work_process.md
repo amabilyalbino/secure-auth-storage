@@ -1,16 +1,33 @@
 # Implementation
 This section describes the full implementation process of the Secure Auth Storage CLI.
 
-- Setup and Envi
-    - 1.1. 
-- [My work process](docs/work_process.md)
+- [Designed Password Security Strategy](#designed-password-security-strategy)
+
+- [Install dependencies](#install-dependencies)
+
+- [Project Setup and Constants](#project-setup-and-constants)
+
+  - [CLI Structure](#1-cli-structure)
+  - [Environment Variables and Constants](#2-environment-variables-and-constants)
+
+    - [Setup the `.env` file](#21-setup-the-env-file)
+- [Credential Handling: Hashing, Storing, and Validation](#credential-handling-hashing-storing-and-validation)
+
+  - [Hashing Function](#hashing-function)
+  - [Store Credentials](#store-credentials)
+  - [Verify Credentials](#verify-credentials)
+  - [Verify Password]() 
 
 ## Designed Password Security Strategy
 
 - **PBKDF2** → as the main password hashing function
+
 - **SHA-256** as the internal algorithm inside PBKDF2.
+
 - Unique **salt** per user to make hashes different → generated using Python’s `secrets.token_bytes(16)` for cryptographic randomness
+
 -  A secret string called **pepper** is a value that must be created manually *(like a password or token)*, or it can be generated using the same secrets module used to generate the salt.
+
 - Number of **iterations** defined → `150000`
 
 > [!NOTE]
@@ -110,11 +127,11 @@ DB_PASSWORD=mysecurepassword
 DB_HOST=localhost
 ```
 
-## Credential Handling  Hashing, Storing, and Validation
+## Credential Handling: Hashing, Storing, and Validation
 
 This section explains how I implemented the secure processing of user credentials, including how passwords are hashed, stored in the database, and later verified during login.
 
-### Hashing Function
+### Hashing Function 
 ---
 → **Defined in:** `password.py`
 
@@ -219,3 +236,150 @@ def store_credentials(username: str, password: str) -> None:
 ➌ - **Returns:**
 
 - Return (`None`)
+
+### Verify Credentials
+---
+→ **Defined in:** `auth.py`
+
+This function is responsible for validating a user's login attempt by retrieving the stored credentials from the database and comparing the provided password with the stored hash.
+
+```python
+def verify_credentials(username: str, password: str) -> bool:
+	result = select_db(
+		"SELECT salt, hashed_password FROM users WHERE username = %s",
+		(username,),
+		"verify_credentials",
+	)
+
+	if not result:
+		logger.warning(f"Login attempt for non-existent user: '{username}'")
+		return False
+
+	salt, stored_hash = bytes.fromhex(result[0][0]), result[0][1]
+	return verify_password(password, salt, stored_hash)
+  ```
+
+  ❶ - **Receives:**
+
+  - `username`: a string input provided by the user.
+  - `password`: a user-provided password as a string.
+
+➋ - **Process:**
+
+  - ***Database Query:***
+
+    - Uses the `select_db()` function to fetch the stored `salt` and `hashed_password` for the given `username`.
+
+  - ***User check:***
+
+    - If the `username` is not found, it logs a warning and returns `False`.
+
+  - ***Password Verification:***
+  
+    - Calls `verify_password()` to compare the stored hash with a fresh hash generated.
+
+➌ - **Returns:**
+
+- `True` if the hashes match (successful login)
+
+- `False` otherwise (invalid credentials).
+
+### Verify Password
+---
+→ **Defined in:** `password.py`
+
+Handles comparison between a freshly hashed password and a stored hash.
+
+```python
+def verify_password(password: str, salt: bytes, expected_hash: str) -> bool:
+
+	try:
+		hashed = hash_password(password, salt)
+		return hashed.hex() == expected_hash
+
+	except Exception as e:
+		logger.error(f"Error verifying password: {e}")
+		return False
+```
+❶ - **Receives:**
+
+  - `password`: a user-provided password as a string.
+
+  - `salt`: The salt string, originally generated and stored when the user registered. It is used to recreate the original hash.
+
+  - `expected_hash`: The previously stored hash from the database (in hex format) that the newly generated hash will be compared against.
+
+➋ - **Process:**
+
+- ***Hashing the input:***
+
+  - Calls `hash_password()`
+
+- ***Comparison:***
+
+  - Converts the freshly generated hash into a hexadecimal string using `.hex()`.
+  
+  - Checks if it is exactly the same as the `expected_hash` stored in the database, using **equality operator** `hashed.hex() == expected_hash`.
+
+➌ - **Returns:**
+
+- `True`  if the generated hash matches the expected hash, indicating that the password is correct.
+
+- `False` if the hashes don't match or any error occurs during the process.
+
+### Database
+---
+→ **Defined in:** `db.py`
+
+This file manages everything related to talking to the database. It connects to the PostgreSQL database, runs queries, inserts data, and creates the table where user information is stored.
+
+```python
+def get_connection():
+	try:
+		return psycopg2.connect(
+			dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=5432
+		)
+	except psycopg2.OperationalError as e:
+		logger.error(f"Failed to connect to database: {e}")
+		raise
+
+
+def select_db(query: str, vars, func_name: str):
+	try:
+		with get_connection() as conn:
+			with conn.cursor() as cur:
+				cur.execute(query, vars)
+				return cur.fetchall()
+	except psycopg2.Error as e:
+		logger.error(f"Database error during {func_name}: {e}")
+		raise
+
+
+def insert_db(query: str, vars, func_name: str):
+	try:
+		with get_connection() as conn:
+			with conn.cursor() as cur:
+				cur.execute(query, vars)
+				conn.commit()
+
+	except psycopg2.Error as e:
+		logger.error(f"Database error during {func_name}: {e}")
+		raise
+
+
+def setup_user_table():
+	insert_db(
+		"CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, salt TEXT NOT NULL, hashed_password TEXT NOT NULL);",
+		(),
+		"setup_user_table",
+	)
+	logger.info("Users table initialized.")
+```
+- `get_connection()`: connects to the PostgreSQL database using the credentials from  `.env` file.
+
+- `select_db(query, vars, func_name)`: runs a `SELECT` query and returns the result. Used to get data from the database.
+
+- `insert_db(query, vars, func_name)`: runs an `INSERT`, `CREATE`, or `UPDATE` query. Used to add or update data in the database.
+
+- `setup_user_table()`: creates the users table if it doesn’t already exist. This is called when the app starts to make sure the database is ready.
+
