@@ -226,7 +226,7 @@ def store_credentials(username: str, password: str) -> None:
 
     - Uses `secrets.token_bytes(16)` to create a 16-byte random salt for this user.
 
-  - ***Hashes the password (Call `hash_password()`)***
+  - ***Hashes the password*** (Call `hash_password()`)
 
   - ***Stores credentials in the database:***
 
