@@ -1,7 +1,7 @@
 # Implementation
 This section describes the full implementation process of the Secure Auth Storage CLI.
 
-- 1. Setup and Envi
+- ① Setup and Envi
     - 1.1. 
 - [My work process](docs/work_process.md)
 
@@ -13,9 +13,7 @@ This section describes the full implementation process of the Secure Auth Storag
 -  A secret string called **pepper** is a value that must be created manually *(like a password or token)*, or it can be generated using the same secrets module used to generate the salt.
 - Number of **iterations** defined → `150000`
 
-> [!INFORMATION]
->
-> **PBKDF2** is a cryptographic algorithm that uses **SHA-256** in multiple rounds to derive a secure hash. It combines the password + salt + pepper, and runs 150,000 iterations before producing the final output.
+**PBKDF2** is a cryptographic algorithm that uses **SHA-256** in multiple rounds to derive a secure hash. It combines the password + salt + pepper, and runs 150,000 iterations before producing the final output.
 >
 
 ## Install Dependencies
@@ -37,7 +35,7 @@ To start building the project, I first added the required libraries to the `requ
 
 ## Project Setup and Constants
 
-### 1. CLI Structure
+### ① CLI Structure
 ---
 I started by creating a file called `main.py` inside the `src/` folder. In this file, I built a simple menu-driven CLI interface that allows the user to:
 
@@ -56,7 +54,7 @@ All the core logic — such as *(validation, hashing, credential storage, and ve
 
   → `settings.py`
 
-### 2. Environment Variables and Constants
+### ② Environment Variables and Constants
 ---
 
 To manage environment variables and constants, I created a separate file called `settings.py`.
@@ -92,7 +90,7 @@ DB_HOST = require_env("DB_HOST")
 
 - `PEPPER` is read and encoded to bytes for hashing.
 
-#### 2.1 Setup the `.env` file
+#### ②.① Setup the `.env` file
 ----
 The `.env` file sits at the root of the project and defines sensitive values like the PEPPER, database credentials, and hashing configuration.
 
@@ -130,12 +128,12 @@ def hash_password(password: str, salt: bytes) -> bytes:
 		logger.error(f"Error hashing password: {e}")
 		raise
 ```
-- **Receives:**
+① **Receives:**
 
   - `password`: a user-provided password as a string
   - `salt:` randomly string generated
 
-- **Process:**
+② **Process:**
   - Converts the password to bytes using `.encode()`
 
   - Appends the secret `PEPPER` (loaded from `.env`) to the password
@@ -148,6 +146,6 @@ def hash_password(password: str, salt: bytes) -> bytes:
 
     - `150000` iterations 
 
-- **Returns:**
+③ **Returns:**
 
     - A derived password hash in raw bytes format.
